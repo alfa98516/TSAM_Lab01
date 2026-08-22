@@ -1,5 +1,5 @@
 # c++ files 
-MAIN=client.cpp
+MAIN=main.cpp
 
 # hpp files
 

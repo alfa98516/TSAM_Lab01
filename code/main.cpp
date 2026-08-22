@@ -21,15 +21,16 @@ int main(int argc, const char* argv[]) {
     struct sockaddr_in destaddr;
 
     destaddr.sin_family = AF_INET;
-    destaddr.sin_port = htons(4006); // HACK: take port number from  command line argument.
+    destaddr.sin_port =
+        htons(4006); // HACK: take port number from  command line argument.
     if (inet_pton(AF_INET, ipaddr, (void*)&destaddr.sin_addr) < 1) {
         std::cerr << "invalid ip address or address family" << ipaddr << '\n';
         exit(1);
     }
 
     int ret;
-    if ((ret = sendto(socket_fd, s.c_str(), s.length(), 0, (struct sockaddr*)&destaddr,
-                      sizeof(destaddr))) < 0) {
+    if ((ret = sendto(socket_fd, s.c_str(), s.length(), 0,
+                      (struct sockaddr*)&destaddr, sizeof(destaddr))) < 0) {
         perror("Error sending");
     }
 
@@ -37,8 +38,8 @@ int main(int argc, const char* argv[]) {
     socklen_t srcaddrlen;
     char buffer[2048];
 
-    if ((ret = recvfrom(socket_fd, buffer, sizeof(buffer), 0, (struct sockaddr*)&srcaddr,
-                        &srcaddrlen) < 0)) {
+    if ((ret = recvfrom(socket_fd, buffer, sizeof(buffer), 0,
+                        (struct sockaddr*)&srcaddr, &srcaddrlen) < 0)) {
         perror("Error receiving");
         exit(1);
     }
