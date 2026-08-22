@@ -7,7 +7,7 @@ PointerAlignment: Left # Align pointers to the left
 IndentWidth: 4
 UseTab: Never
 ColumnLimit: 80
-# These are my preferences, teehee. They're pretty common standards, but # STFU I DO WHAT I WANT
+# These are my preferences, teehee. They're pretty common standards, but 
 # they're not universal.
 AllowShortFunctionsOnASingleLine: Empty 
 AllowShortIfStatementsOnASingleLine: Never
