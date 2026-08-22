@@ -10,7 +10,11 @@
 int main(int argc, const char* argv[]) {
     
 
-    const char *ipaddr = argv[1]; //TODO check for bounds
+    if (argc < 2) {
+        std::cerr << "Usage: " << argv[0] << " <IPv4 address>" << std::endl;
+        return EXIT_FAILURE;
+    }
+    const char *ipaddr = argv[1];
 
     int sockfd;
     if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
