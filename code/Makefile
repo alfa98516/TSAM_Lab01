@@ -12,7 +12,7 @@ CC=g++
 CXXFLAGS=$(SYMBOLS) $(WARNINGS) $(STD) $(SANITIZE)
 
 # Out file 
-OUT = a.out
+OUT = scanner
 
 OUT: $(MAIN) $(TREE)
 	$(CC) $(CXXFLAGS) $(MAIN) -o $(OUT)
