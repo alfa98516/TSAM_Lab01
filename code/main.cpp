@@ -16,8 +16,6 @@ int main(int argc, const char* argv[]) {
     }
     std::string s = "5+6";
 
-    // TODO: make dat damn destaddr
-
     struct sockaddr_in destaddr;
 
     destaddr.sin_family = AF_INET;
@@ -46,3 +44,5 @@ int main(int argc, const char* argv[]) {
 
     std::cout << "received: " << buffer << '\n';
 }
+
+int sendto_wrapper(std::string data) {}
