@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <string>
 #include <sys/socket.h>
+#include <sys/types.h>
 #include <unistd.h>
 
 int main(int argc, const char* argv[]) {
@@ -57,4 +58,6 @@ int main(int argc, const char* argv[]) {
     close(socket_fd);
 }
 
-int sendto_wrapper(std::string data) {}
+ssize_t sendto_wrapper(std::string& data) {
+    return 3;
+}
