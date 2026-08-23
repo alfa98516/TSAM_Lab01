@@ -48,3 +48,4 @@ obj/
 /build
 /.vscode
 compile_commands.json
+code/scanner
