@@ -25,9 +25,16 @@ int main(int argc, const char* argv[]) {
     dest_addr.sin_family = AF_INET;
     dest_addr.sin_port =
         htons(4006); // HACK: take port number from  command line argument.
-    if (inet_pton(AF_INET, ip_addr, (void*)&dest_addr.sin_addr) < 1) {
-        std::cerr << "invalid ip address or address family" << ip_addr << '\n';
-        exit(1);
+    int inet_pton_result = inet_pton(AF_INET, ip_addr, &dest_addr.sin_addr);
+
+    if (inet_pton_result == 0) {
+        std::cerr << "Invalid IPv4 address: " << ip_addr << '\n';
+        return 1;
+    }
+
+    if (inet_pton_result < 0) {
+        perror("inet_pton");
+        return 1;
     }
 
     // Send the string to the destination address.
