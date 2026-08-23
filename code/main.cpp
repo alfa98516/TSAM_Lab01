@@ -19,7 +19,8 @@ int main(int argc, const char* argv[]) {
     int socket_fd = socket(AF_INET, SOCK_DGRAM, 0);
     if (socket_fd < 0) {
         perror("Error creating socket!");
-        exit(1);
+        close(socket_fd);
+        return 1;
     }
     std::string s = "5+6";
 
@@ -35,11 +36,13 @@ int main(int argc, const char* argv[]) {
 
     if (inet_pton_result == 0) {
         std::cerr << "Invalid IPv4 address: " << ip_addr << '\n';
+        close(socket_fd);
         return 1;
     }
 
     if (inet_pton_result < 0) {
         perror("inet_pton");
+        close(socket_fd);
         return 1;
     }
 
@@ -47,6 +50,8 @@ int main(int argc, const char* argv[]) {
     if (sendto(socket_fd, s.c_str(), s.length(), 0,
                (struct sockaddr*)&dest_addr, sizeof(dest_addr)) < 0) {
         perror("Error sending");
+        close(socket_fd);
+        return 1;
     }
 
     struct sockaddr_in src_addr{};
@@ -56,7 +61,8 @@ int main(int argc, const char* argv[]) {
     if (recvfrom(socket_fd, data_buffer, sizeof(data_buffer), 0,
                  (struct sockaddr*)&src_addr, &src_addr_len) < 0) {
         perror("Error receiving");
-        exit(1);
+        close(socket_fd);
+        return 1;
     }
 
     std::cout << "received: " << data_buffer << '\n';
