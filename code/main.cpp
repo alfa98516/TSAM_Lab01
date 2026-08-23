@@ -10,7 +10,7 @@
 
 int main(int argc, const char* argv[]) {
     if (argc < 3) {
-        std::cerr << "Usage:" << argv[0] << "<IPv4 address>" << "<port>"
+        std::cerr << "Usage:" << argv[0] << " <IPv4 address>" << " <port>"
                   << '\n';
         return 1;
     }
