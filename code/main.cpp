@@ -86,7 +86,3 @@ int main(int argc, const char* argv[]) {
         close(socket_fd);
     }
 }
-
-ssize_t sendto_wrapper(std::string& data) {
-    return 3;
-}
