@@ -9,6 +9,11 @@
 #include <unistd.h>
 
 int main(int argc, const char* argv[]) {
+    if (argc < 2) {
+        std::cerr << "Usage:" << argv[0] << "<IPv4 address>" << '\n';
+        return 1;
+    }
+
     const char* ip_addr = argv[1]; // TODO: check for bounds
     // Try to make an IPv4 UDP socket.
     int socket_fd = socket(AF_INET, SOCK_DGRAM, 0);
