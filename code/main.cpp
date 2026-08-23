@@ -17,7 +17,9 @@ int main(int argc, const char* argv[]) {
     }
     std::string s = "5+6";
 
-    struct sockaddr_in dest_addr;
+    // TODO: make dat damn dest_addr
+
+    struct sockaddr_in dest_addr{};
 
     // Set address family to IPv4, and port number to 4006.
     dest_addr.sin_family = AF_INET;
@@ -29,18 +31,17 @@ int main(int argc, const char* argv[]) {
     }
 
     // Send the string to the destination address.
-    ssize_t ret = sendto(socket_fd, s.c_str(), s.length(), 0,
-                         (struct sockaddr*)&dest_addr, sizeof(dest_addr));
-    if (ret < 0) {
+    if (sendto(socket_fd, s.c_str(), s.length(), 0,
+               (struct sockaddr*)&dest_addr, sizeof(dest_addr)) < 0) {
         perror("Error sending");
     }
 
-    struct sockaddr_in src_addr;
+    struct sockaddr_in src_addr{};
     socklen_t src_addr_len;
     char data_buffer[2048];
 
-    if ((ret = recvfrom(socket_fd, data_buffer, sizeof(data_buffer), 0,
-                        (struct sockaddr*)&src_addr, &src_addr_len) < 0)) {
+    if (recvfrom(socket_fd, data_buffer, sizeof(data_buffer), 0,
+                 (struct sockaddr*)&src_addr, &src_addr_len) < 0) {
         perror("Error receiving");
         exit(1);
     }
