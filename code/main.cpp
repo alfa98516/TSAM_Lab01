@@ -7,6 +7,7 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <vector>
 
 int main(int argc, const char* argv[]) {
     if (argc < 4) {
@@ -19,10 +20,12 @@ int main(int argc, const char* argv[]) {
 
     const char* ip_addr = argv[1]; // TODO: check for bounds
     const int low_port = std::stoi(argv[2]);
-    const int high_port = std::stoi(argv[1]);
+    const int high_port = std::stoi(argv[3]);
 
     timeval timeout{};
-    timeout.tv_sec = 3;
+    timeout.tv_sec = 1;
+
+    std::vector<int> open_ports;
 
     for (int curr_port = low_port; curr_port < high_port; curr_port++) {
         // Create socket.
@@ -43,20 +46,20 @@ int main(int argc, const char* argv[]) {
         if (inet_pton_result == 0) {
             std::cerr << "Invalid IPv4 address: " << ip_addr << '\n';
             close(socket_fd);
-            return 1;
+            continue;
         }
 
         if (inet_pton_result < 0) {
             perror("inet_pton");
             close(socket_fd);
-            return 1;
+            continue;
         }
 
         if (setsockopt(socket_fd, SOL_SOCKET, SO_RCVTIMEO, &timeout,
                        sizeof(timeout)) < 0) {
             perror("setsockopt");
             close(socket_fd);
-            return 1;
+            continue;
         }
 
         // Send the string to the destination address.
@@ -64,7 +67,7 @@ int main(int argc, const char* argv[]) {
                    (struct sockaddr*)&dest_addr, sizeof(dest_addr)) < 0) {
             perror("Error sending");
             close(socket_fd);
-            return 1;
+            continue;
         }
 
         char data_buffer[2048];
@@ -76,10 +79,11 @@ int main(int argc, const char* argv[]) {
         if (n_bytes < 0) {
             perror("Error receiving");
             close(socket_fd);
-            return 1;
+            continue;
         }
 
         std::cout.write(data_buffer, n_bytes);
+        open_ports.push_back(curr_port);
         close(socket_fd);
     }
 }
