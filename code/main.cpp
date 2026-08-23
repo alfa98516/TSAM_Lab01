@@ -18,13 +18,13 @@ int main(int argc, const char* argv[]) {
     const char* ip_addr = argv[1]; // TODO: check for bounds
     int port = std::atoi(argv[2]);
     // Try to make an IPv4 UDP socket.
-    int socket_fd = socket(AF_INET, SOCK_DGRAM | SOCK_NONBLOCK, 0);
+    int socket_fd = socket(AF_INET, SOCK_DGRAM, 0);
     if (socket_fd < 0) {
         perror("Error creating socket!");
         close(socket_fd);
         return 1;
     }
-    std::string s = "5+6";
+    std::string s = "farts";
 
     // TODO: make dat damn dest_addr
 
@@ -55,12 +55,11 @@ int main(int argc, const char* argv[]) {
         return 1;
     }
 
-    struct sockaddr_in src_addr{};
-    socklen_t src_addr_len;
+    struct sockaddr* src_addr{};
     char data_buffer[2048];
-    ssize_t n_bytes = recvfrom(socket_fd, data_buffer, sizeof(data_buffer), 0,
-                               (struct sockaddr*)&src_addr, &src_addr_len);
-    std::cout << "recvfrom returns";
+    socklen_t src_addr_len = sizeof(data_buffer);
+    ssize_t n_bytes = recvfrom(socket_fd, (void*)data_buffer,
+                               sizeof(data_buffer), 0, src_addr, &src_addr_len);
     if (n_bytes < 0) {
         perror("Error receiving");
         close(socket_fd);
