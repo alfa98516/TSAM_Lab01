@@ -23,7 +23,7 @@ int main(int argc, const char* argv[]) {
     const int high_port = std::stoi(argv[3]);
 
     timeval timeout{};
-    timeout.tv_sec = 1;
+    timeout.tv_usec = 5000;
 
     std::vector<int> open_ports;
 
@@ -65,30 +65,32 @@ int main(int argc, const char* argv[]) {
             continue;
         }
 
-        // Send the string to the destination address.
-        if (sendto(socket_fd, payload.c_str(), payload.length(), 0,
-                   (struct sockaddr*)&dest_addr, sizeof(dest_addr)) < 0) {
-            // perror("Error sending");
-            close(socket_fd);
-            continue;
-        }
-
         char data_buffer[2048];
         struct sockaddr_in src_addr{};
         socklen_t src_addr_len = sizeof(src_addr);
-        ssize_t n_bytes =
-            recvfrom(socket_fd, data_buffer, sizeof(data_buffer), 0,
-                     (struct sockaddr*)&src_addr, &src_addr_len);
-        if (n_bytes < 0) {
-            // perror("Error receiving");
-            close(socket_fd);
-            continue;
+        ssize_t n_bytes;
+        // perror("Error receiving");
+
+        for (int i = 0; i < 5; i++) {
+            if (sendto(socket_fd, payload.c_str(), payload.length(), 0,
+                       (struct sockaddr*)&dest_addr, sizeof(dest_addr)) >= 0) {
+                n_bytes =
+                    recvfrom(socket_fd, data_buffer, sizeof(data_buffer), 0,
+                             (struct sockaddr*)&src_addr, &src_addr_len);
+                if (n_bytes < 0) {
+                    continue;
+                } else {
+                    // std::cout.write(data_buffer, n_bytes);
+                    // std::cout << '\n';
+                    open_ports.push_back(curr_port);
+                    break;
+                }
+            }
         }
-        std::cout.write(data_buffer, n_bytes);
-        open_ports.push_back(curr_port);
+
         close(socket_fd);
     }
-    std::cout << '\n' << "Open ports:";
+    std::cout << '\n' << "Open ports:" << '\n';
     for (auto open_port : open_ports) {
         std::cout << open_port << '\n';
     }
