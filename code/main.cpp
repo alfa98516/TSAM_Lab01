@@ -9,12 +9,14 @@
 #include <unistd.h>
 
 int main(int argc, const char* argv[]) {
-    if (argc < 2) {
-        std::cerr << "Usage:" << argv[0] << "<IPv4 address>" << '\n';
+    if (argc < 3) {
+        std::cerr << "Usage:" << argv[0] << "<IPv4 address>" << "<port>"
+                  << '\n';
         return 1;
     }
 
     const char* ip_addr = argv[1]; // TODO: check for bounds
+    int port = std::atoi(argv[2]);
     // Try to make an IPv4 UDP socket.
     int socket_fd = socket(AF_INET, SOCK_DGRAM, 0);
     if (socket_fd < 0) {
@@ -30,8 +32,7 @@ int main(int argc, const char* argv[]) {
 
     // Set address family to IPv4, and port number to 4006.
     dest_addr.sin_family = AF_INET;
-    dest_addr.sin_port =
-        htons(4006); // HACK: take port number from  command line argument.
+    dest_addr.sin_port = htons(port);
     int inet_pton_result = inet_pton(AF_INET, ip_addr, &dest_addr.sin_addr);
 
     if (inet_pton_result == 0) {
