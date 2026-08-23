@@ -28,6 +28,10 @@ int main(int argc, const char* argv[]) {
     std::vector<int> open_ports;
 
     for (int curr_port = low_port; curr_port < high_port; curr_port++) {
+        // Print current progress on the same line.
+        double progress =
+            100.0 * (curr_port - low_port) / (high_port - low_port);
+        std::cout << "\rScan progress:" << progress << "%" << std::flush;
         // Create socket.
         int socket_fd = socket(AF_INET, SOCK_DGRAM, 0);
         if (socket_fd < 0) {
