@@ -78,7 +78,6 @@ int main(int argc, const char* argv[]) {
             close(socket_fd);
             return 1;
         }
-
         std::cout.write(data_buffer, n_bytes);
         close(socket_fd);
     }
