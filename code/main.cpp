@@ -18,19 +18,30 @@ int main(int argc, const char* argv[]) {
     const char* ip_addr = argv[1]; // TODO: check for bounds
     int port = std::atoi(argv[2]);
     // Try to make an IPv4 UDP socket.
-    int socket_fd = socket(AF_INET, SOCK_DGRAM | SOCK_NONBLOCK, 0);
+    int socket_fd = socket(AF_INET, SOCK_DGRAM, 0);
     if (socket_fd < 0) {
         perror("Error creating socket!");
         close(socket_fd);
         return 1;
     }
+
+    timeval timeout{};
+    timeout.tv_sec = 3;
+
+    if (setsockopt(socket_fd, SOL_SOCKET, SO_RCVTIMEO, &timeout,
+                   sizeof(timeout)) < 0) {
+        perror("setsockopt");
+        close(socket_fd);
+        return 1;
+    }
+
     std::string s = "5+6";
 
     // TODO: make dat damn dest_addr
 
     struct sockaddr_in dest_addr{};
 
-    // Set address family to IPv4, and port number to 4006.
+    // Set address family to IPv4, and convert port number.
     dest_addr.sin_family = AF_INET;
     dest_addr.sin_port = htons(port);
     int inet_pton_result = inet_pton(AF_INET, ip_addr, &dest_addr.sin_addr);
@@ -55,12 +66,12 @@ int main(int argc, const char* argv[]) {
         return 1;
     }
 
-    struct sockaddr_in src_addr{};
-    socklen_t src_addr_len;
     char data_buffer[2048];
+    struct sockaddr_in src_addr{};
+    socklen_t src_addr_len = sizeof(src_addr);
     ssize_t n_bytes = recvfrom(socket_fd, data_buffer, sizeof(data_buffer), 0,
                                (struct sockaddr*)&src_addr, &src_addr_len);
-    std::cout << "recvfrom returns";
+    std::cerr << "recvfrom returned " << n_bytes << '\n';
     if (n_bytes < 0) {
         perror("Error receiving");
         close(socket_fd);
