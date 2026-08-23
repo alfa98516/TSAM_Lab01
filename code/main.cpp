@@ -11,8 +11,8 @@
 
 int main(int argc, const char* argv[]) {
     if (argc < 4) {
-        std::cerr << "Usage:" << argv[0] << " <IPv4 address>" << " <low port>"
-                  << " <high port>" << '\n';
+        std::cerr << "Usage:" << argv[0]
+                  << " <IPv4 address> <low port> <high port>" << '\n';
         return 1;
     }
 
@@ -21,6 +21,19 @@ int main(int argc, const char* argv[]) {
     const char* ip_addr = argv[1]; // TODO: check for bounds
     const int low_port = std::stoi(argv[2]);
     const int high_port = std::stoi(argv[3]);
+
+    if ((low_port < 0 || low_port > 65535) ||
+        (high_port > 65535 || high_port < 0)) {
+        std::cerr << "Port numbers range between 0 and 65535\n";
+        return 1;
+    }
+
+    if (low_port > high_port) {
+        std::cerr
+            << "First specified port number must be lower than the second\n";
+        std::cerr << "Did you mean: " << high_port << " " << low_port << "?\n";
+        return 1;
+    }
 
     timeval timeout{};
     timeout.tv_usec = 300;
