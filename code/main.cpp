@@ -84,7 +84,6 @@ int main(int argc, const char* argv[]) {
             close(socket_fd);
             continue;
         }
-
         std::cout.write(data_buffer, n_bytes);
         open_ports.push_back(curr_port);
         close(socket_fd);
@@ -93,8 +92,4 @@ int main(int argc, const char* argv[]) {
     for (auto open_port : open_ports) {
         std::cout << open_port << '\n';
     }
-}
-
-ssize_t sendto_wrapper(std::string& data) {
-    return 3;
 }
