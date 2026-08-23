@@ -16,7 +16,7 @@ int main(int argc, const char* argv[]) {
 
     const char* ip_addr = argv[1]; // TODO: check for bounds
     // Try to make an IPv4 UDP socket.
-    int socket_fd = socket(AF_INET, SOCK_DGRAM, 0);
+    int socket_fd = socket(AF_INET, SOCK_DGRAM | SOCK_NONBLOCK, 0);
     if (socket_fd < 0) {
         perror("Error creating socket!");
         close(socket_fd);
@@ -57,15 +57,16 @@ int main(int argc, const char* argv[]) {
     struct sockaddr_in src_addr{};
     socklen_t src_addr_len;
     char data_buffer[2048];
-
-    if (recvfrom(socket_fd, data_buffer, sizeof(data_buffer), 0,
-                 (struct sockaddr*)&src_addr, &src_addr_len) < 0) {
+    ssize_t n_bytes = recvfrom(socket_fd, data_buffer, sizeof(data_buffer), 0,
+                               (struct sockaddr*)&src_addr, &src_addr_len);
+    std::cout << "recvfrom returns";
+    if (n_bytes < 0) {
         perror("Error receiving");
         close(socket_fd);
         return 1;
     }
 
-    std::cout << "received: " << data_buffer << '\n';
+    std::cout.write(data_buffer, n_bytes);
     close(socket_fd);
 }
 
