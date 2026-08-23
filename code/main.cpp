@@ -27,11 +27,29 @@ int main(int argc, const char* argv[]) {
 
     std::vector<int> open_ports;
 
+    struct sockaddr_in dest_addr{};
+
+    // Set address family to IPv4, and convert port number.
+    dest_addr.sin_family = AF_INET;
+    int inet_pton_result = inet_pton(AF_INET, ip_addr, &dest_addr.sin_addr);
+
+    if (inet_pton_result == 0) {
+        std::cerr << "Invalid IPv4 address: " << ip_addr << '\n';
+        return 1;
+    }
+
+    if (inet_pton_result < 0) {
+        perror("inet_pton");
+        return 1;
+    }
+
     for (int curr_port = low_port; curr_port < high_port; curr_port++) {
         // Print current progress on the same line.
         double progress =
             100.0 * (curr_port - low_port) / (high_port - low_port);
         std::cout << "\rScan progress:" << progress << "%" << std::flush;
+
+        dest_addr.sin_port = htons(curr_port);
         // Create socket.
         int socket_fd = socket(AF_INET, SOCK_DGRAM, 0);
         if (socket_fd < 0) {
@@ -40,28 +58,9 @@ int main(int argc, const char* argv[]) {
             return 1;
         }
 
-        struct sockaddr_in dest_addr{};
-
-        // Set address family to IPv4, and convert port number.
-        dest_addr.sin_family = AF_INET;
-        dest_addr.sin_port = htons(curr_port);
-        int inet_pton_result = inet_pton(AF_INET, ip_addr, &dest_addr.sin_addr);
-
-        if (inet_pton_result == 0) {
-            std::cerr << "Invalid IPv4 address: " << ip_addr << '\n';
-            close(socket_fd);
-            continue;
-        }
-
-        if (inet_pton_result < 0) {
-            perror("inet_pton");
-            close(socket_fd);
-            continue;
-        }
-
         if (setsockopt(socket_fd, SOL_SOCKET, SO_RCVTIMEO, &timeout,
                        sizeof(timeout)) < 0) {
-            perror("setsockopt");
+            // perror("setsockopt");
             close(socket_fd);
             continue;
         }
@@ -69,7 +68,7 @@ int main(int argc, const char* argv[]) {
         // Send the string to the destination address.
         if (sendto(socket_fd, payload.c_str(), payload.length(), 0,
                    (struct sockaddr*)&dest_addr, sizeof(dest_addr)) < 0) {
-            perror("Error sending");
+            // perror("Error sending");
             close(socket_fd);
             continue;
         }
@@ -81,7 +80,7 @@ int main(int argc, const char* argv[]) {
             recvfrom(socket_fd, data_buffer, sizeof(data_buffer), 0,
                      (struct sockaddr*)&src_addr, &src_addr_len);
         if (n_bytes < 0) {
-            perror("Error receiving");
+            // perror("Error receiving");
             close(socket_fd);
             continue;
         }
@@ -89,6 +88,10 @@ int main(int argc, const char* argv[]) {
         std::cout.write(data_buffer, n_bytes);
         open_ports.push_back(curr_port);
         close(socket_fd);
+    }
+    std::cout << '\n' << "Open ports:";
+    for (auto open_port : open_ports) {
+        std::cout << open_port << '\n';
     }
 }
 
