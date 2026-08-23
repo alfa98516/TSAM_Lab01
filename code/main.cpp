@@ -68,28 +68,30 @@ int main(int argc, const char* argv[]) {
         char data_buffer[2048];
         struct sockaddr_in src_addr{};
         socklen_t src_addr_len = sizeof(src_addr);
-        ssize_t n_bytes;
+        ssize_t n_bytes_received;
         // perror("Error receiving");
 
         for (int i = 0; i < 5; i++) {
             if (sendto(socket_fd, payload.c_str(), payload.length(), 0,
-                       (struct sockaddr*)&dest_addr, sizeof(dest_addr)) >= 0) {
-                n_bytes =
-                    recvfrom(socket_fd, data_buffer, sizeof(data_buffer), 0,
-                             (struct sockaddr*)&src_addr, &src_addr_len);
-                if (n_bytes < 0) {
-                    continue;
-                } else {
-                    // std::cout.write(data_buffer, n_bytes);
-                    // std::cout << '\n';
-                    open_ports.push_back(curr_port);
-                    break;
-                }
+                       (struct sockaddr*)&dest_addr, sizeof(dest_addr)) < 0) {
+                continue;
+            }
+            n_bytes_received =
+                recvfrom(socket_fd, data_buffer, sizeof(data_buffer), 0,
+                         (struct sockaddr*)&src_addr, &src_addr_len);
+            if (n_bytes_received < 0) {
+                continue;
+            } else {
+                // std::cout.write(data_buffer, n_bytes_received);
+                // std::cout << '\n';
+                open_ports.push_back(curr_port);
+                break;
             }
         }
 
         close(socket_fd);
     }
+
     std::cout << '\n' << "Open ports:" << '\n';
     for (auto open_port : open_ports) {
         std::cout << open_port << '\n';
