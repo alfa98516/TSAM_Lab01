@@ -23,7 +23,7 @@ int main(int argc, const char* argv[]) {
     const int high_port = std::stoi(argv[3]);
 
     timeval timeout{};
-    timeout.tv_usec = 5000;
+    timeout.tv_usec = 300;
 
     std::vector<int> open_ports;
 
@@ -43,7 +43,7 @@ int main(int argc, const char* argv[]) {
         return 1;
     }
 
-    for (int curr_port = low_port; curr_port < high_port; curr_port++) {
+    for (int curr_port = low_port; curr_port <= high_port; curr_port++) {
         // Print current progress on the same line.
         double progress =
             100.0 * (curr_port - low_port) / (high_port - low_port);
