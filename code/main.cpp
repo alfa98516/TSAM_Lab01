@@ -1,6 +1,7 @@
 #include <arpa/inet.h>
 #include <cstdlib>
 #include <iostream>
+#include <map>
 #include <netinet/in.h>
 #include <stdio.h>
 #include <string>
@@ -43,10 +44,11 @@ int main(int argc, const char* argv[]) {
     }
 
     timeval timeout{};
+
     // Time to wait in microseconds for each scan before timeout.
     timeout.tv_usec = 5000;
 
-    std::vector<int> open_ports; // Array of found open ports.
+    std::map<int, bool> open_ports; // set of found open ports.
 
     struct sockaddr_in dest_addr{};
 
@@ -64,6 +66,20 @@ int main(int argc, const char* argv[]) {
         return 1;
     }
 
+    int socket_fd = socket(AF_INET, SOCK_DGRAM, 0);
+    if (socket_fd < 0) {
+        perror("Error creating socket!");
+        close(socket_fd);
+        return 1;
+    }
+    if (setsockopt(socket_fd, SOL_SOCKET, SO_RCVTIMEO, &timeout,
+                   sizeof(timeout)) < 0) {
+        close(socket_fd);
+        return 1;
+    }
+
+    // Set socket options.
+
     // Scan given IP address for open UDP ports in the given range.
     for (int curr_port = low_port; curr_port <= high_port; curr_port++) {
         // Print current progress on the same line.
@@ -72,26 +88,11 @@ int main(int argc, const char* argv[]) {
         std::cout << "\rScan progress:" << progress << "%" << std::flush;
 
         dest_addr.sin_port = htons(curr_port);
-        // Create socket.
-        int socket_fd = socket(AF_INET, SOCK_DGRAM, 0);
-        if (socket_fd < 0) {
-            perror("Error creating socket!");
-            close(socket_fd);
-            return 1;
-        }
-
-        // Set socket options.
-        if (setsockopt(socket_fd, SOL_SOCKET, SO_RCVTIMEO, &timeout,
-                       sizeof(timeout)) < 0) {
-            close(socket_fd);
-            continue;
-        }
 
         // Buffer to hold received data, source address, and its length.
         char data_buffer[2048];
         struct sockaddr_in src_addr{};
         socklen_t src_addr_len = sizeof(src_addr);
-
         /* Send UPD datagrams to current port repeatedly until we receive a
          * response (max 5 tries). */
         for (int i = 0; i < 5; i++) {
@@ -105,16 +106,17 @@ int main(int argc, const char* argv[]) {
             if (n_bytes_received < 0) {
                 continue;
             } else {
-                open_ports.push_back(curr_port); // Open port found.
+
+                open_ports[ntohs(src_addr.sin_port)] = true; // Open port found.
                 break;
             }
         }
-
-        close(socket_fd);
     }
-
+    close(socket_fd);
     std::cout << '\n' << "Open ports:" << '\n';
-    for (auto open_port : open_ports) {
-        std::cout << open_port << '\n';
+    for (int i = low_port; i < high_port; i++) {
+        if (open_ports[i]) {
+            std::cout << i << '\n';
+        }
     }
 }
