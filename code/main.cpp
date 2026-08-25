@@ -4,6 +4,7 @@
 #include <map>
 #include <netinet/in.h>
 #include <stdio.h>
+#include <string.h>
 #include <string>
 #include <sys/socket.h>
 #include <sys/types.h>
@@ -48,7 +49,8 @@ int main(int argc, const char* argv[]) {
     // Time to wait in microseconds for each scan before timeout.
     timeout.tv_usec = 5000;
 
-    std::map<int, bool> open_ports; // set of found open ports.
+    bool open_ports[high_port - low_port]; // set of found open ports.
+    memset(open_ports, 0, sizeof(open_ports));
 
     struct sockaddr_in dest_addr{};
 
@@ -107,16 +109,17 @@ int main(int argc, const char* argv[]) {
                 continue;
             } else {
 
-                open_ports[ntohs(src_addr.sin_port)] = true; // Open port found.
+                open_ports[ntohs(src_addr.sin_port) - low_port] =
+                    true; // Open port found.
                 break;
             }
         }
     }
     close(socket_fd);
     std::cout << '\n' << "Open ports:" << '\n';
-    for (int i = low_port; i < high_port; i++) {
+    for (int i = 0; i < high_port - low_port; i++) {
         if (open_ports[i]) {
-            std::cout << i << '\n';
+            std::cout << i + low_port << '\n';
         }
     }
 }
