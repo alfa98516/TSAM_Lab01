@@ -1,4 +1,5 @@
 #include <arpa/inet.h>
+#include <cerrno>
 #include <cstdlib>
 #include <iostream>
 #include <map>
@@ -47,7 +48,7 @@ int main(int argc, const char* argv[]) {
     timeval timeout{};
 
     // Time to wait in microseconds for each scan before timeout.
-    timeout.tv_usec = 5000;
+    timeout.tv_sec = 1;
 
     const int port_count = high_port - low_port + 1; // set of found open ports.
     bool open_ports[port_count];
@@ -83,6 +84,10 @@ int main(int argc, const char* argv[]) {
 
     // Set socket options.
 
+    // Buffer to hold received data, source address, and its length.
+    char data_buffer[2048];
+    struct sockaddr_in src_addr{};
+    socklen_t src_addr_len = sizeof(src_addr);
     // Scan given IP address for open UDP ports in the given range.
     for (int curr_port = low_port; curr_port <= high_port; curr_port++) {
         // Print current progress on the same line.
@@ -91,10 +96,6 @@ int main(int argc, const char* argv[]) {
 
         dest_addr.sin_port = htons(curr_port);
 
-        // Buffer to hold received data, source address, and its length.
-        char data_buffer[2048];
-        struct sockaddr_in src_addr{};
-        socklen_t src_addr_len = sizeof(src_addr);
         /* Send UPD datagrams to current port repeatedly until we receive a
          * response (max 5 tries). */
         for (int i = 0; i < 5; i++) {
@@ -102,16 +103,20 @@ int main(int argc, const char* argv[]) {
                        (struct sockaddr*)&dest_addr, sizeof(dest_addr)) < 0) {
                 continue;
             }
+        }
+        while (true) {
             ssize_t n_bytes_received =
                 recvfrom(socket_fd, data_buffer, sizeof(data_buffer), 0,
                          (struct sockaddr*)&src_addr, &src_addr_len);
             if (n_bytes_received < 0) {
+                if (errno == EAGAIN || errno == EWOULDBLOCK) {
+                    break; // A timeout.
+                }
+                perror("recfrom"); // A non-timeout error.
                 continue;
             } else {
-
-                open_ports[ntohs(src_addr.sin_port) - low_port] =
-                    true; // Open port found.
-                break;
+                open_ports[ntohs(src_addr.sin_port) - low_port] = true;
+                continue;
             }
         }
     }
