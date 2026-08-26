@@ -50,7 +50,8 @@ int main(int argc, const char* argv[]) {
     timeout.tv_usec = 5000;
 
     const int port_count = high_port - low_port + 1; // set of found open ports.
-    std::vector<bool> open_ports(port_count, false);
+    bool open_ports[port_count];
+    memset(open_ports, 0, sizeof(open_ports));
 
     struct sockaddr_in dest_addr{};
 
