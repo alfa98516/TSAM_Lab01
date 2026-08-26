@@ -49,8 +49,8 @@ int main(int argc, const char* argv[]) {
     // Time to wait in microseconds for each scan before timeout.
     timeout.tv_usec = 5000;
 
-    bool open_ports[high_port - low_port]; // set of found open ports.
-    memset(open_ports, 0, sizeof(open_ports));
+    const int port_count = high_port - low_port + 1; // set of found open ports.
+    std::vector<bool> open_ports(port_count, false);
 
     struct sockaddr_in dest_addr{};
 
@@ -117,7 +117,7 @@ int main(int argc, const char* argv[]) {
     }
     close(socket_fd);
     std::cout << '\n' << "Open ports:" << '\n';
-    for (int i = 0; i < high_port - low_port; i++) {
+    for (int i = 0; i < port_count; i++) {
         if (open_ports[i]) {
             std::cout << i + low_port << '\n';
         }
