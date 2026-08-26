@@ -104,10 +104,12 @@ int main(int argc, const char* argv[]) {
                 continue;
             }
         }
+        // Get the responses.
         while (true) {
             ssize_t n_bytes_received =
                 recvfrom(socket_fd, data_buffer, sizeof(data_buffer), 0,
                          (struct sockaddr*)&src_addr, &src_addr_len);
+            // Got an error.
             if (n_bytes_received < 0) {
                 if (errno == EAGAIN || errno == EWOULDBLOCK) {
                     break; // A timeout.
@@ -115,6 +117,7 @@ int main(int argc, const char* argv[]) {
                 perror("recfrom"); // A non-timeout error.
                 continue;
             } else {
+                // Got a successful response.
                 open_ports[ntohs(src_addr.sin_port) - low_port] = true;
                 continue;
             }
