@@ -85,8 +85,7 @@ int main(int argc, const char* argv[]) {
     // Scan given IP address for open UDP ports in the given range.
     for (int curr_port = low_port; curr_port <= high_port; curr_port++) {
         // Print current progress on the same line.
-        double progress =
-            100.0 * (curr_port - low_port) / (high_port - low_port);
+        double progress = 100.0 * (curr_port - low_port + 1) / port_count;
         std::cout << "\rScan progress:" << progress << "%" << std::flush;
 
         dest_addr.sin_port = htons(curr_port);
