@@ -49,3 +49,5 @@ obj/
 /.vscode
 compile_commands.json
 code/scanner
+code/main
+code/main.dsYM/
