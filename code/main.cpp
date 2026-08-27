@@ -1,5 +1,6 @@
 #include <arpa/inet.h>
 #include <cerrno>
+#include <chrono>
 #include <cstdlib>
 #include <iostream>
 #include <map>
@@ -9,6 +10,7 @@
 #include <string>
 #include <sys/socket.h>
 #include <sys/types.h>
+#include <thread>
 #include <unistd.h>
 #include <vector>
 
@@ -26,7 +28,7 @@ int main(int argc, const char* argv[]) {
         return 1;
     }
 
-    const std::string payload = "TSAM_SCAN";
+    const std::string payload = "hi";
 
     const char* ip_addr = argv[1];
     const int low_port = std::stoi(argv[2]);
@@ -92,39 +94,41 @@ int main(int argc, const char* argv[]) {
     for (int curr_port = low_port; curr_port <= high_port; curr_port++) {
         // Print current progress on the same line.
         double progress = 100.0 * (curr_port - low_port + 1) / port_count;
-        std::cout << "\rScan progress:" << progress << "%" << std::flush;
+        std::cout << "\rScan Progress:" << (int)progress << "%" << std::flush;
 
         dest_addr.sin_port = htons(curr_port);
 
         /* Send UPD datagrams to current port repeatedly until we receive a
          * response (max 5 tries). */
         for (int i = 0; i < 5; i++) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(1));
             if (sendto(socket_fd, payload.c_str(), payload.length(), 0,
                        (struct sockaddr*)&dest_addr, sizeof(dest_addr)) < 0) {
                 continue;
             }
         }
         // Get the responses.
-        while (true) {
-            ssize_t n_bytes_received =
-                recvfrom(socket_fd, data_buffer, sizeof(data_buffer), 0,
-                         (struct sockaddr*)&src_addr, &src_addr_len);
-            // Got an error.
-            if (n_bytes_received < 0) {
-                if (errno == EAGAIN || errno == EWOULDBLOCK) {
-                    break; // A timeout.
-                }
-                perror("recfrom"); // A non-timeout error.
-                continue;
-            } else {
-                // Got a successful response.
-                open_ports[ntohs(src_addr.sin_port) - low_port] = true;
-                continue;
+    }
+
+    while (true) {
+        ssize_t n_bytes_received =
+            recvfrom(socket_fd, data_buffer, sizeof(data_buffer), 0,
+                     (struct sockaddr*)&src_addr, &src_addr_len);
+        // Got an error.
+        if (n_bytes_received < 0) {
+            if (errno == EAGAIN || errno == EWOULDBLOCK) {
+                break; // A timeout.
             }
+            perror("recvfrom"); // A non-timeout error.
+            continue;
+        } else {
+            // Got a successful response.
+            open_ports[ntohs(src_addr.sin_port) - low_port] = true;
+            continue;
         }
     }
     close(socket_fd);
-    std::cout << '\n' << "Open ports:" << '\n';
+    std::cout << "\nOpen ports:\n";
     for (int i = 0; i < port_count; i++) {
         if (open_ports[i]) {
             std::cout << i + low_port << '\n';
