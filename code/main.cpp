@@ -1,9 +1,9 @@
 #include <arpa/inet.h>
+#include <cctype>
 #include <cerrno>
 #include <chrono>
 #include <cstdlib>
 #include <iostream>
-#include <map>
 #include <netinet/in.h>
 #include <stdexcept>
 #include <stdio.h>
@@ -13,7 +13,6 @@
 #include <sys/types.h>
 #include <thread>
 #include <unistd.h>
-#include <vector>
 
 /**
  * @brief Main function that scans a given IPv4 address for open UDP ports in
@@ -34,7 +33,6 @@ int main(int argc, const char* argv[]) {
     const std::string payload = "hi";
 
     const char* ip_addr = argv[1];
-
     const char* argv2 = argv[2];
     const int low_port = [argv2]() {
         try {
