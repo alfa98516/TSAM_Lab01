@@ -33,6 +33,8 @@ int main(int argc, const char* argv[]) {
     const std::string payload = "hi";
 
     const char* ip_addr = argv[1];
+
+    // Try to make low port and high port integers, catch if not possible
     const char* argv2 = argv[2];
     const int low_port = [argv2]() {
         try {
@@ -52,9 +54,6 @@ int main(int argc, const char* argv[]) {
         }
         return -1;
     }();
-
-    // const int low_port = std::stoi(argv[2]);
-    // const int high_port = std::stoi(argv[3]);
 
     if ((low_port < 0 || low_port > 65535) ||
         (high_port > 65535 || high_port < 0)) {
