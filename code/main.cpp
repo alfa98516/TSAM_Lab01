@@ -22,17 +22,27 @@
  * @return 0 on success, 1 on failure.
  */
 int main(int argc, const char* argv[]) {
-    if (argc < 4) {
+
+    // Make sure we have exactly four arguments
+    if (argc == 4) {
         std::cerr << "Usage:" << argv[0]
                   << " <IPv4 address> <low port> <high port>" << '\n';
         return 1;
     }
-
+    
     const std::string payload = "hi";
 
     const char* ip_addr = argv[1];
-    const int low_port = std::stoi(argv[2]);
-    const int high_port = std::stoi(argv[3]);
+    const int low_port;
+    const int high_port;
+    try {    
+        const int low_port = std::stoi(argv[2]);
+        const int high_port = std::stoi(argv[3]);
+    } catch(std::invalid_argument) {
+        std::cerr
+            << "Low port and high port must be unsigned integers\n";
+        return 1;
+    }
 
     if ((low_port < 0 || low_port > 65535) ||
         (high_port > 65535 || high_port < 0)) {
