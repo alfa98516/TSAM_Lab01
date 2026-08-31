@@ -35,6 +35,7 @@ int main(int argc, const char* argv[]) {
 
     const char* ip_addr = argv[1];
 
+    // Try to make low port and high port integers, catch if not possible
     const char* argv2 = argv[2];
     const int low_port = [argv2]() {
         try {
@@ -46,8 +47,6 @@ int main(int argc, const char* argv[]) {
     }();
 
     const char* argv3 = argv[3];
-
-    // Try to make low port and high port integers, catch if not possible
     const int high_port = [argv3]() {
         try {
             return std::stoi(argv3);
