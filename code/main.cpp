@@ -5,6 +5,7 @@
 #include <iostream>
 #include <map>
 #include <netinet/in.h>
+#include <stdexcept>
 #include <stdio.h>
 #include <string.h>
 #include <string>
@@ -15,7 +16,7 @@
 #include <vector>
 
 /**
- * @brief Main function that scans a given IPv4 address for open UDP ports in a
+ * @brief Main function that scans a given IPv4 address for open UDP ports in
  * specified range.
  * @param argc Number of args.
  * @param argv Argument vector.
@@ -24,25 +25,38 @@
 int main(int argc, const char* argv[]) {
 
     // Make sure we have exactly four arguments
-    if (argc == 4) {
+    if (argc != 4) {
         std::cerr << "Usage:" << argv[0]
                   << " <IPv4 address> <low port> <high port>" << '\n';
         return 1;
     }
-    
+
     const std::string payload = "hi";
 
     const char* ip_addr = argv[1];
-    const int low_port;
-    const int high_port;
-    try {    
-        const int low_port = std::stoi(argv[2]);
-        const int high_port = std::stoi(argv[3]);
-    } catch(std::invalid_argument) {
-        std::cerr
-            << "Low port and high port must be unsigned integers\n";
-        return 1;
-    }
+
+    const char* argv2 = argv[2];
+    const int low_port = [argv2]() {
+        try {
+            return std::stoi(argv2);
+        } catch (std::invalid_argument) {
+            std::cerr << "Argument 2 must be of type integer";
+        }
+        return -1;
+    }();
+
+    const char* argv3 = argv[3];
+    const int high_port = [argv3]() {
+        try {
+            return std::stoi(argv3);
+        } catch (std::invalid_argument) {
+            std::cerr << "Argument 3 must be of type integer";
+        }
+        return -1;
+    }();
+
+    // const int low_port = std::stoi(argv[2]);
+    // const int high_port = std::stoi(argv[3]);
 
     if ((low_port < 0 || low_port > 65535) ||
         (high_port > 65535 || high_port < 0)) {

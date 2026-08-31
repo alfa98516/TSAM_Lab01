@@ -68,6 +68,7 @@ int main(int argc, char* argv[]) {
                      (struct sockaddr*)&src_addr, &src_addr_len);
         if (nbytes_recieved < 0) {
             if (errno == EAGAIN || errno == EWOULDBLOCK) {
+                std::cout << "No response from port " << port << '\n';
                 break;
             }
             continue;
