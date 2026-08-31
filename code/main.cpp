@@ -46,6 +46,8 @@ int main(int argc, const char* argv[]) {
     }();
 
     const char* argv3 = argv[3];
+
+    // Try to make low port and high port integers, catch if not possible
     const int high_port = [argv3]() {
         try {
             return std::stoi(argv3);
@@ -55,8 +57,6 @@ int main(int argc, const char* argv[]) {
         return -1;
     }();
 
-    // const int low_port = std::stoi(argv[2]);
-    // const int high_port = std::stoi(argv[3]);
 
     if ((low_port < 0 || low_port > 65535) ||
         (high_port > 65535 || high_port < 0)) {
